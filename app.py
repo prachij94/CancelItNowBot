@@ -12,6 +12,7 @@ from telegram.ext import (
     MessageHandler, filters, ConversationHandler, ContextTypes
 )
 from datetime import datetime
+import json
 
 # Load environment variables
 load_dotenv()
@@ -23,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 # Google Sheets setup
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("google_credentials.json", scope)
+creds_dict = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open("CancelItNowDB").sheet1
 
