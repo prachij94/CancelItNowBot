@@ -1,0 +1,12 @@
+# Ignore Python cache and logs
+__pycache__/
+*.pyc
+*.log
+
+# Ignore environment files
+.env
+google_credentials.json
+
+# Ignore system files
+.DS_Store
+
