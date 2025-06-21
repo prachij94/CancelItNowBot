@@ -272,8 +272,25 @@ async def get_priority(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
+from flask import Flask, request
+
+flask_app = Flask(__name__)
+bot_app = None  # Will hold the Telegram Application object
+
+@flask_app.route('/')
+def index():
+    return 'CancelItNowBot is running via webhook 🎯', 200
+
+@flask_app.route('/webhook', methods=['POST'])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), bot_app.bot)
+    bot_app.update_queue.put_nowait(update)
+    return 'OK', 200
+
 def main():
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    global bot_app
+
+    bot_app = ApplicationBuilder().token(TELEGRAM_TOKEN).concurrent_updates(True).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start), CallbackQueryHandler(handle_buttons)],
@@ -285,11 +302,15 @@ def main():
         fallbacks=[]
     )
 
-    app.add_handler(conv_handler)
-    app.add_handler(CallbackQueryHandler(handle_buttons))
-    app.add_handler(CommandHandler("menu", main_menu))
+    bot_app.add_handler(conv_handler)
+    bot_app.add_handler(CallbackQueryHandler(handle_buttons))
+    bot_app.add_handler(CommandHandler("menu", main_menu))
 
-    app.run_polling()
+    bot_app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000)),
+        webhook_url=f"{os.environ.get('WEBHOOK_URL')}/webhook"
+    )
 
 if __name__ == '__main__':
     main()
