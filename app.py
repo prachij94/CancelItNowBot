@@ -18,6 +18,7 @@ from threading import Thread
 # Load environment variables
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
