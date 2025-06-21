@@ -292,8 +292,8 @@ def webhook():
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
     bot_app.update_queue.put_nowait(update)
     return 'OK', 200
-
-def main():
+# Run bot in a background thread
+def run_bot():
     global bot_app
 
     bot_app = ApplicationBuilder().token(TELEGRAM_TOKEN).concurrent_updates(True).build()
@@ -312,11 +312,14 @@ def main():
     bot_app.add_handler(CallbackQueryHandler(handle_buttons))
     bot_app.add_handler(CommandHandler("menu", main_menu))
 
-    bot_app.run_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get("PORT", 10000)),
-        webhook_url=f"{os.environ.get('WEBHOOK_URL')}/webhook"
-    )
+    # Register webhook with Telegram
+    bot_app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
 
-if __name__ == '__main__':
+    print("✅ Telegram webhook registered")
+
+def main():
+    Thread(target=run_bot).start()
+    flask_app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+
+if __name__ == "__main__":
     main()
