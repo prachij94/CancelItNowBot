@@ -292,6 +292,7 @@ def health():
 def webhook():
     if request.method == 'GET':
         return 'OK', 200  # Health check response
+    print("✅ /webhook route triggered")
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
     bot_app.update_queue.put_nowait(update)
     return 'OK', 200
