@@ -14,6 +14,7 @@ from telegram.ext import (
 from datetime import datetime
 import json
 from threading import Thread
+import asyncio  # Needed for running coroutines from non-async functions
 
 # Load environment variables
 load_dotenv()
@@ -315,7 +316,7 @@ def run_bot():
     bot_app.add_handler(CommandHandler("menu", main_menu))
 
     # Register webhook with Telegram
-    bot_app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+    asyncio.run(bot_app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook"))
 
     print("✅ Telegram webhook registered")
 
