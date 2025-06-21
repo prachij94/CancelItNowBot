@@ -299,7 +299,7 @@ def webhook():
     update = Update.de_json(update_data, bot_app.bot)
 
     # ✅ Process the update synchronously with a temporary event loop
-    asyncio.run(bot_app.process_update(update))
+    asyncio.create_task(bot_app.process_update(update))
 
     return 'OK', 200
 
@@ -323,10 +323,14 @@ def run_bot():
     bot_app.add_handler(CallbackQueryHandler(handle_buttons))
     bot_app.add_handler(CommandHandler("menu", main_menu))
 
-    # Register webhook with Telegram
-    asyncio.run(bot_app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook"))
+    # 🔥 Initialize the app explicitly
+    asyncio.run(init_app(bot_app))
 
-    print("✅ Telegram webhook registered")
+async def init_app(app):
+    await app.initialize()
+    await app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+    print("✅ Telegram webhook registered and application initialized")
+
 
 def main():
     Thread(target=run_bot).start()
