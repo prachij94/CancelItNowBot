@@ -281,8 +281,14 @@ bot_app = None  # Will hold the Telegram Application object
 def index():
     return 'CancelItNowBot is running via webhook 🎯', 200
 
-@flask_app.route('/webhook', methods=['POST'])
+@flask_app.route('/healthz')
+def health():
+    return 'I am alive', 200
+
+@flask_app.route('/webhook', methods=['GET','POST'])
 def webhook():
+    if request.method == 'GET':
+        return 'OK', 200  # Health check response
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
     bot_app.update_queue.put_nowait(update)
     return 'OK', 200
