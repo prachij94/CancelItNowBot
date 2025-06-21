@@ -288,14 +288,21 @@ def index():
 def health():
     return 'I am alive', 200
 
-@flask_app.route('/webhook', methods=['GET','POST'])
+@flask_app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
     if request.method == 'GET':
-        return 'OK', 200  # Health check response
+        return 'OK', 200  # UptimeRobot ping check
+    
     print("✅ /webhook route triggered")
-    update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    bot_app.update_queue.put_nowait(update)
+
+    update_data = request.get_json(force=True)
+    update = Update.de_json(update_data, bot_app.bot)
+
+    # Run Telegram update processing asynchronously
+    asyncio.create_task(bot_app.process_update(update))
+
     return 'OK', 200
+
 # Run bot in a background thread
 def run_bot():
     global bot_app
