@@ -298,8 +298,8 @@ def webhook():
     update_data = request.get_json(force=True)
     update = Update.de_json(update_data, bot_app.bot)
 
-    # Run Telegram update processing asynchronously
-    asyncio.create_task(bot_app.process_update(update))
+    # ✅ Process the update synchronously with a temporary event loop
+    asyncio.run(bot_app.process_update(update))
 
     return 'OK', 200
 
